@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual Inbox — VastMyWealth</title>
+<style>
+:root{
+  --navy-1:#0A1730; --navy-2:#122a56; --panel:#152B54; --panel-border:rgba(212,165,74,.35);
+  --gold:#D9A94E; --gold-deep:#B8863B; --text-onnavy:#EDF1FA; --text-onnavy-muted:#A9B8DA;
+  --forest:#3FBE86; --rust:#E4776B;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg, var(--navy-1), var(--navy-2)); color:var(--text-onnavy); height:100vh; overflow:hidden; }
+.app{ display:flex; height:100vh; }
+
+.sidebar{ width:320px; border-right:1px solid var(--panel-border); display:flex; flex-direction:column; background:rgba(255,255,255,.02); }
+.sidebar-header{ padding:16px; border-bottom:1px solid var(--panel-border); display:flex; justify-content:space-between; align-items:center; }
+.sidebar-header h2{ font-size:16px; }
+.refresh-btn{ background:var(--gold); color:var(--navy-1); border:none; border-radius:8px; padding:8px 14px; font-weight:700; cursor:pointer; font-size:13px; }
+.refresh-btn:hover{ filter:brightness(1.05); }
+.thread-list{ overflow-y:auto; flex:1; }
+.thread-item{ padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.06); cursor:pointer; }
+.thread-item:hover, .thread-item.active{ background:rgba(217,169,78,.1); }
+.thread-mobile{ font-weight:700; font-size:14px; }
+.thread-preview{ font-size:12.5px; color:var(--text-onnavy-muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.thread-dir-out{ color:var(--forest); }
+
+.main{ flex:1; display:flex; flex-direction:column; }
+.main-header{ padding:16px 20px; border-bottom:1px solid var(--panel-border); display:flex; justify-content:space-between; align-items:center; }
+.window-badge{ font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px; }
+.window-open{ background:rgba(63,190,134,.15); color:var(--forest); }
+.window-closed{ background:rgba(228,119,107,.15); color:var(--rust); }
+
+.messages{ flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:10px; }
+.msg{ max-width:65%; padding:10px 14px; border-radius:12px; font-size:14px; line-height:1.4; }
+.msg-in{ align-self:flex-start; background:var(--panel); border:1px solid var(--panel-border); }
+.msg-out{ align-self:flex-end; background:var(--gold); color:var(--navy-1); }
+.msg-time{ font-size:10.5px; opacity:.6; margin-top:4px; }
+
+.composer{ border-top:1px solid var(--panel-border); padding:14px 20px; }
+.quick-replies{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.qr-btn{ background:rgba(255,255,255,.06); border:1px solid var(--panel-border); color:var(--text-onnavy-muted); border-radius:16px; padding:6px 12px; font-size:12px; cursor:pointer; }
+.qr-btn:hover{ border-color:var(--gold); color:#fff; }
+.composer-row{ display:flex; gap:10px; }
+.composer-row textarea{ flex:1; border-radius:10px; border:1px solid var(--panel-border); background:rgba(255,255,255,.04); color:#fff; padding:10px; font-size:14px; resize:none; min-height:44px; font-family:inherit; }
+.send-btn{ background:var(--gold); color:var(--navy-1); border:none; border-radius:10px; padding:0 20px; font-weight:700; cursor:pointer; }
+.send-btn:disabled{ opacity:.4; cursor:not-allowed; }
+.empty-state{ display:flex; align-items:center; justify-content:center; flex:1; color:var(--text-onnavy-muted); font-size:14px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Conversations</h2>
+      <button class="refresh-btn" onclick="loadThreads()">Refresh</button>
+    </div>
+    <div class="thread-list" id="threadList"><div style="padding:16px;color:var(--text-onnavy-muted);font-size:13px;">Loading…</div></div>
+  </div>
+  <div class="main" id="main">
+    <div class="empty-state">Select a conversation to view messages</div>
+  </div>
+</div>
+
+<script>
+var BACKEND_URL = "https://script.google.com/macros/s/AKfycbwGTSTzKTJYrhx2wP3UuBPG_64g-ZczNPhem3-PfcPPu8AYQaT0MvSgz1FsyRdoonVndg/exec";
+var currentMobile = null;
+var quickReplies = [];
+
+function loadThreads(){
+  document.getElementById('threadList').innerHTML = '<div style="padding:16px;color:var(--text-onnavy-muted);font-size:13px;">Loading…</div>';
+  fetch(BACKEND_URL + '?action=getManualInboxThreads')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (!data.success) { document.getElementById('threadList').innerHTML = '<div style="padding:16px;">Error loading threads.</div>'; return; }
+      renderThreads(data.threads);
+    })
+    .catch(function(){ document.getElementById('threadList').innerHTML = '<div style="padding:16px;">Connection error.</div>'; });
+}
+
+function renderThreads(threads){
+  var list = document.getElementById('threadList');
+  if (!threads.length) { list.innerHTML = '<div style="padding:16px;color:var(--text-onnavy-muted);font-size:13px;">No recent conversations.</div>'; return; }
+  list.innerHTML = '';
+  threads.forEach(function(t){
+    var item = document.createElement('div');
+    item.className = 'thread-item' + (t.mobile === currentMobile ? ' active' : '');
+    var dirLabel = t.lastDirection === 'Out' ? '<span class="thread-dir-out">You: </span>' : '';
+    item.innerHTML = '<div class="thread-mobile">' + escapeHtml(t.mobile) + '</div>' +
+      '<div class="thread-preview">' + dirLabel + escapeHtml(t.lastMessage) + '</div>';
+    item.onclick = function(){ openThread(t.mobile); };
+    list.appendChild(item);
+  });
+}
+
+function openThread(mobile){
+  currentMobile = mobile;
+  loadThreads();
+  document.getElementById('main').innerHTML = '<div class="empty-state">Loading conversation…</div>';
+
+  Promise.all([
+    fetch(BACKEND_URL + '?action=getManualInboxMessages&mobile=' + encodeURIComponent(mobile)).then(function(r){ return r.json(); }),
+    fetch(BACKEND_URL + '?action=getQuickReplies').then(function(r){ return r.json(); })
+  ]).then(function(results){
+    var msgData = results[0], qrData = results[1];
+    quickReplies = qrData.success ? qrData.replies : [];
+    renderConversation(mobile, msgData);
+  }).catch(function(){
+    document.getElementById('main').innerHTML = '<div class="empty-state">Connection error.</div>';
+  });
+}
+
+function renderConversation(mobile, data){
+  var windowBadge = data.windowOpen
+    ? '<span class="window-badge window-open">Window open</span>'
+    : '<span class="window-badge window-closed">Window closed — customer must message first</span>';
+
+  var html = '<div class="main-header"><div><strong>' + escapeHtml(mobile) + '</strong></div>' + windowBadge + '</div>';
+  html += '<div class="messages" id="messagesPane">';
+  (data.messages || []).forEach(function(m){
+    html += '<div class="msg ' + (m.direction === 'Out' ? 'msg-out' : 'msg-in') + '">' +
+      escapeHtml(m.message) + '<div class="msg-time">' + new Date(m.timestamp).toLocaleString() + '</div></div>';
+  });
+  html += '</div>';
+
+  html += '<div class="composer">';
+  html += '<div class="quick-replies" id="quickReplies"></div>';
+  html += '<div class="composer-row">' +
+    '<textarea id="replyText" placeholder="Type a reply…" ' + (data.windowOpen ? '' : 'disabled') + '></textarea>' +
+    '<button class="send-btn" id="sendBtn" ' + (data.windowOpen ? '' : 'disabled') + '>Send</button>' +
+    '</div></div>';
+
+  document.getElementById('main').innerHTML = html;
+
+  var qrContainer = document.getElementById('quickReplies');
+  quickReplies.forEach(function(qr){
+    var btn = document.createElement('button');
+    btn.className = 'qr-btn';
+    btn.textContent = qr.label;
+    btn.onclick = function(){ document.getElementById('replyText').value = qr.message; };
+    qrContainer.appendChild(btn);
+  });
+
+  document.getElementById('sendBtn').addEventListener('click', function(){ sendReply(mobile); });
+
+  var pane = document.getElementById('messagesPane');
+  pane.scrollTop = pane.scrollHeight;
+}
+
+function sendReply(mobile){
+  var textEl = document.getElementById('replyText');
+  var message = textEl.value.trim();
+  if (!message) return;
+  var btn = document.getElementById('sendBtn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  fetch(BACKEND_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'sendManualReply', mobile: mobile, message: message })
+  })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.success) {
+        textEl.value = '';
+        openThread(mobile);
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+        btn.disabled = false; btn.textContent = 'Send';
+      }
+    })
+    .catch(function(err){
+      alert('Connection error: ' + err.message);
+      btn.disabled = false; btn.textContent = 'Send';
+    });
+}
+
+function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+loadThreads();
+</script>
+</body>
+</html>
