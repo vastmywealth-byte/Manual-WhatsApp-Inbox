@@ -33,6 +33,18 @@ body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg,
 .back-btn{ background:none; border:none; color:var(--text-onnavy); font-size:22px; cursor:pointer; padding:4px 8px; line-height:1; }
 .thread-header-info{ flex:1; }
 .thread-header-mobile{ font-weight:700; font-size:15px; }
+  .call-btn{
+  background: var(--forest);
+  color: #fff;
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  display: flex; align-items:center; justify-content:center;
+  font-size: 18px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.call-btn:active{ filter:brightness(0.9); }
+.window-badge{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; display:inline-block; margin-top:3px; }
 .window-badge{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; display:inline-block; margin-top:3px; }
 .window-open{ background:rgba(63,190,134,.15); color:var(--forest); }
 .window-closed{ background:rgba(228,119,107,.15); color:var(--rust); }
@@ -71,6 +83,7 @@ body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg,
         <div class="thread-header-mobile" id="threadHeaderMobile"></div>
         <span class="window-badge" id="windowBadge"></span>
       </div>
+      <a class="call-btn" id="callBtn" href="#" title="Call">📞</a>
     </div>
     <div class="messages" id="messagesPane"></div>
     <div class="composer">
@@ -130,8 +143,8 @@ function openThread(mobile){
   currentMobile = mobile;
   showThreadView();
   document.getElementById('threadHeaderMobile').textContent = mobile;
+  document.getElementById('callBtn').href = 'tel:+91' + mobile;
   document.getElementById('messagesPane').innerHTML = '<div class="empty-msg">Loading…</div>';
-
   Promise.all([
     fetch(BACKEND_URL + '?action=getManualInboxMessages&mobile=' + encodeURIComponent(mobile)).then(function(r){ return r.json(); }),
     fetch(BACKEND_URL + '?action=getQuickReplies').then(function(r){ return r.json(); })
