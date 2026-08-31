@@ -11,56 +11,78 @@
   --forest:#3FBE86; --rust:#E4776B;
 }
 *{box-sizing:border-box; margin:0; padding:0;}
-body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg, var(--navy-1), var(--navy-2)); color:var(--text-onnavy); height:100vh; overflow:hidden; }
-.app{ display:flex; height:100vh; }
+html, body{ height:100%; overflow:hidden; }
+body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg, var(--navy-1), var(--navy-2)); color:var(--text-onnavy); }
+.app{ display:flex; flex-direction:column; height:100vh; }
 
-.sidebar{ width:320px; border-right:1px solid var(--panel-border); display:flex; flex-direction:column; background:rgba(255,255,255,.02); }
-.sidebar-header{ padding:16px; border-bottom:1px solid var(--panel-border); display:flex; justify-content:space-between; align-items:center; }
-.sidebar-header h2{ font-size:16px; }
-.refresh-btn{ background:var(--gold); color:var(--navy-1); border:none; border-radius:8px; padding:8px 14px; font-weight:700; cursor:pointer; font-size:13px; }
+.view{ display:none; flex-direction:column; height:100%; }
+.view.active{ display:flex; }
+
+.list-header{ padding:16px; border-bottom:1px solid var(--panel-border); display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+.list-header h2{ font-size:17px; }
+.refresh-btn{ background:var(--gold); color:var(--navy-1); border:none; border-radius:8px; padding:9px 16px; font-weight:700; cursor:pointer; font-size:13px; }
 .refresh-btn:hover{ filter:brightness(1.05); }
-.thread-list{ overflow-y:auto; flex:1; }
-.thread-item{ padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.06); cursor:pointer; }
-.thread-item:hover, .thread-item.active{ background:rgba(217,169,78,.1); }
-.thread-mobile{ font-weight:700; font-size:14px; }
-.thread-preview{ font-size:12.5px; color:var(--text-onnavy-muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.thread-list{ overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch; }
+.thread-item{ padding:16px; border-bottom:1px solid rgba(255,255,255,.06); cursor:pointer; }
+.thread-item:active{ background:rgba(217,169,78,.1); }
+.thread-mobile{ font-weight:700; font-size:15px; }
+.thread-preview{ font-size:13px; color:var(--text-onnavy-muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .thread-dir-out{ color:var(--forest); }
+.empty-msg{ padding:24px 16px; color:var(--text-onnavy-muted); font-size:14px; text-align:center; }
 
-.main{ flex:1; display:flex; flex-direction:column; }
-.main-header{ padding:16px 20px; border-bottom:1px solid var(--panel-border); display:flex; justify-content:space-between; align-items:center; }
-.window-badge{ font-size:12px; font-weight:700; padding:5px 12px; border-radius:20px; }
+.thread-header{ padding:12px 16px; border-bottom:1px solid var(--panel-border); display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.back-btn{ background:none; border:none; color:var(--text-onnavy); font-size:22px; cursor:pointer; padding:4px 8px; line-height:1; }
+.thread-header-info{ flex:1; }
+.thread-header-mobile{ font-weight:700; font-size:15px; }
+.window-badge{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; display:inline-block; margin-top:3px; }
 .window-open{ background:rgba(63,190,134,.15); color:var(--forest); }
 .window-closed{ background:rgba(228,119,107,.15); color:var(--rust); }
 
-.messages{ flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:10px; }
-.msg{ max-width:65%; padding:10px 14px; border-radius:12px; font-size:14px; line-height:1.4; }
+.messages{ flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; -webkit-overflow-scrolling:touch; }
+.msg{ max-width:80%; padding:10px 13px; border-radius:12px; font-size:14px; line-height:1.4; word-wrap:break-word; }
 .msg-in{ align-self:flex-start; background:var(--panel); border:1px solid var(--panel-border); }
 .msg-out{ align-self:flex-end; background:var(--gold); color:var(--navy-1); }
-.msg-time{ font-size:10.5px; opacity:.6; margin-top:4px; }
+.msg-time{ font-size:10px; opacity:.65; margin-top:4px; }
 
-.composer{ border-top:1px solid var(--panel-border); padding:14px 20px; }
-.quick-replies{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
-.qr-btn{ background:rgba(255,255,255,.06); border:1px solid var(--panel-border); color:var(--text-onnavy-muted); border-radius:16px; padding:6px 12px; font-size:12px; cursor:pointer; }
-.qr-btn:hover{ border-color:var(--gold); color:#fff; }
-.composer-row{ display:flex; gap:10px; }
-.composer-row textarea{ flex:1; border-radius:10px; border:1px solid var(--panel-border); background:rgba(255,255,255,.04); color:#fff; padding:10px; font-size:14px; resize:none; min-height:44px; font-family:inherit; }
-.send-btn{ background:var(--gold); color:var(--navy-1); border:none; border-radius:10px; padding:0 20px; font-weight:700; cursor:pointer; }
+.composer{ border-top:1px solid var(--panel-border); padding:10px 12px; flex-shrink:0; }
+.quick-replies{ display:flex; gap:8px; overflow-x:auto; margin-bottom:8px; padding-bottom:2px; -webkit-overflow-scrolling:touch; }
+.qr-btn{ background:rgba(255,255,255,.06); border:1px solid var(--panel-border); color:var(--text-onnavy-muted); border-radius:16px; padding:6px 12px; font-size:12px; cursor:pointer; white-space:nowrap; flex-shrink:0; }
+.qr-btn:active{ border-color:var(--gold); color:#fff; }
+.composer-row{ display:flex; gap:8px; }
+.composer-row textarea{ flex:1; border-radius:10px; border:1px solid var(--panel-border); background:rgba(255,255,255,.04); color:#fff; padding:10px; font-size:14px; resize:none; min-height:40px; max-height:100px; font-family:inherit; }
+.send-btn{ background:var(--gold); color:var(--navy-1); border:none; border-radius:10px; padding:0 18px; font-weight:700; cursor:pointer; font-size:14px; }
 .send-btn:disabled{ opacity:.4; cursor:not-allowed; }
-.empty-state{ display:flex; align-items:center; justify-content:center; flex:1; color:var(--text-onnavy-muted); font-size:14px; }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="sidebar">
-    <div class="sidebar-header">
+
+  <div class="view active" id="listView">
+    <div class="list-header">
       <h2>Conversations</h2>
       <button class="refresh-btn" onclick="loadThreads()">Refresh</button>
     </div>
-    <div class="thread-list" id="threadList"><div style="padding:16px;color:var(--text-onnavy-muted);font-size:13px;">Loading…</div></div>
+    <div class="thread-list" id="threadList"><div class="empty-msg">Loading…</div></div>
   </div>
-  <div class="main" id="main">
-    <div class="empty-state">Select a conversation to view messages</div>
+
+  <div class="view" id="threadView">
+    <div class="thread-header">
+      <button class="back-btn" onclick="showListView()">←</button>
+      <div class="thread-header-info">
+        <div class="thread-header-mobile" id="threadHeaderMobile"></div>
+        <span class="window-badge" id="windowBadge"></span>
+      </div>
+    </div>
+    <div class="messages" id="messagesPane"></div>
+    <div class="composer">
+      <div class="quick-replies" id="quickReplies"></div>
+      <div class="composer-row">
+        <textarea id="replyText" placeholder="Type a reply…"></textarea>
+        <button class="send-btn" id="sendBtn">Send</button>
+      </div>
+    </div>
   </div>
+
 </div>
 
 <script>
@@ -68,24 +90,35 @@ var BACKEND_URL = "https://script.google.com/macros/s/AKfycbwGTSTzKTJYrhx2wP3UuB
 var currentMobile = null;
 var quickReplies = [];
 
+function showListView(){
+  document.getElementById('threadView').classList.remove('active');
+  document.getElementById('listView').classList.add('active');
+  currentMobile = null;
+}
+
+function showThreadView(){
+  document.getElementById('listView').classList.remove('active');
+  document.getElementById('threadView').classList.add('active');
+}
+
 function loadThreads(){
-  document.getElementById('threadList').innerHTML = '<div style="padding:16px;color:var(--text-onnavy-muted);font-size:13px;">Loading…</div>';
+  document.getElementById('threadList').innerHTML = '<div class="empty-msg">Loading…</div>';
   fetch(BACKEND_URL + '?action=getManualInboxThreads')
     .then(function(r){ return r.json(); })
     .then(function(data){
-      if (!data.success) { document.getElementById('threadList').innerHTML = '<div style="padding:16px;">Error loading threads.</div>'; return; }
+      if (!data.success) { document.getElementById('threadList').innerHTML = '<div class="empty-msg">Error loading threads.</div>'; return; }
       renderThreads(data.threads);
     })
-    .catch(function(){ document.getElementById('threadList').innerHTML = '<div style="padding:16px;">Connection error.</div>'; });
+    .catch(function(){ document.getElementById('threadList').innerHTML = '<div class="empty-msg">Connection error.</div>'; });
 }
 
 function renderThreads(threads){
   var list = document.getElementById('threadList');
-  if (!threads.length) { list.innerHTML = '<div style="padding:16px;color:var(--text-onnavy-muted);font-size:13px;">No recent conversations.</div>'; return; }
+  if (!threads.length) { list.innerHTML = '<div class="empty-msg">No recent conversations.</div>'; return; }
   list.innerHTML = '';
   threads.forEach(function(t){
     var item = document.createElement('div');
-    item.className = 'thread-item' + (t.mobile === currentMobile ? ' active' : '');
+    item.className = 'thread-item';
     var dirLabel = t.lastDirection === 'Out' ? '<span class="thread-dir-out">You: </span>' : '';
     item.innerHTML = '<div class="thread-mobile">' + escapeHtml(t.mobile) + '</div>' +
       '<div class="thread-preview">' + dirLabel + escapeHtml(t.lastMessage) + '</div>';
@@ -96,8 +129,9 @@ function renderThreads(threads){
 
 function openThread(mobile){
   currentMobile = mobile;
-  loadThreads();
-  document.getElementById('main').innerHTML = '<div class="empty-state">Loading conversation…</div>';
+  showThreadView();
+  document.getElementById('threadHeaderMobile').textContent = mobile;
+  document.getElementById('messagesPane').innerHTML = '<div class="empty-msg">Loading…</div>';
 
   Promise.all([
     fetch(BACKEND_URL + '?action=getManualInboxMessages&mobile=' + encodeURIComponent(mobile)).then(function(r){ return r.json(); }),
@@ -107,33 +141,32 @@ function openThread(mobile){
     quickReplies = qrData.success ? qrData.replies : [];
     renderConversation(mobile, msgData);
   }).catch(function(){
-    document.getElementById('main').innerHTML = '<div class="empty-state">Connection error.</div>';
+    document.getElementById('messagesPane').innerHTML = '<div class="empty-msg">Connection error.</div>';
   });
 }
 
 function renderConversation(mobile, data){
-  var windowBadge = data.windowOpen
-    ? '<span class="window-badge window-open">Window open</span>'
-    : '<span class="window-badge window-closed">Window closed — customer must message first</span>';
+  var badge = document.getElementById('windowBadge');
+  if (data.windowOpen) {
+    badge.textContent = 'Window open';
+    badge.className = 'window-badge window-open';
+  } else {
+    badge.textContent = 'Window closed';
+    badge.className = 'window-badge window-closed';
+  }
 
-  var html = '<div class="main-header"><div><strong>' + escapeHtml(mobile) + '</strong></div>' + windowBadge + '</div>';
-  html += '<div class="messages" id="messagesPane">';
+  var pane = document.getElementById('messagesPane');
+  pane.innerHTML = '';
   (data.messages || []).forEach(function(m){
-    html += '<div class="msg ' + (m.direction === 'Out' ? 'msg-out' : 'msg-in') + '">' +
-      escapeHtml(m.message) + '<div class="msg-time">' + new Date(m.timestamp).toLocaleString() + '</div></div>';
+    var div = document.createElement('div');
+    div.className = 'msg ' + (m.direction === 'Out' ? 'msg-out' : 'msg-in');
+    div.innerHTML = escapeHtml(m.message) + '<div class="msg-time">' + new Date(m.timestamp).toLocaleString() + '</div>';
+    pane.appendChild(div);
   });
-  html += '</div>';
-
-  html += '<div class="composer">';
-  html += '<div class="quick-replies" id="quickReplies"></div>';
-  html += '<div class="composer-row">' +
-    '<textarea id="replyText" placeholder="Type a reply…" ' + (data.windowOpen ? '' : 'disabled') + '></textarea>' +
-    '<button class="send-btn" id="sendBtn" ' + (data.windowOpen ? '' : 'disabled') + '>Send</button>' +
-    '</div></div>';
-
-  document.getElementById('main').innerHTML = html;
+  pane.scrollTop = pane.scrollHeight;
 
   var qrContainer = document.getElementById('quickReplies');
+  qrContainer.innerHTML = '';
   quickReplies.forEach(function(qr){
     var btn = document.createElement('button');
     btn.className = 'qr-btn';
@@ -142,38 +175,40 @@ function renderConversation(mobile, data){
     qrContainer.appendChild(btn);
   });
 
-  document.getElementById('sendBtn').addEventListener('click', function(){ sendReply(mobile); });
-
-  var pane = document.getElementById('messagesPane');
-  pane.scrollTop = pane.scrollHeight;
+  var textEl = document.getElementById('replyText');
+  var sendBtn = document.getElementById('sendBtn');
+  textEl.disabled = !data.windowOpen;
+  sendBtn.disabled = !data.windowOpen;
+  textEl.placeholder = data.windowOpen ? 'Type a reply…' : 'Window closed — customer must message first';
 }
 
-function sendReply(mobile){
+document.getElementById('sendBtn').addEventListener('click', function(){
+  if (!currentMobile) return;
   var textEl = document.getElementById('replyText');
   var message = textEl.value.trim();
   if (!message) return;
   var btn = document.getElementById('sendBtn');
-  btn.disabled = true; btn.textContent = 'Sending…';
+  btn.disabled = true; btn.textContent = '…';
 
   fetch(BACKEND_URL, {
     method: 'POST',
-    body: JSON.stringify({ action: 'sendManualReply', mobile: mobile, message: message })
+    body: JSON.stringify({ action: 'sendManualReply', mobile: currentMobile, message: message })
   })
     .then(function(r){ return r.json(); })
     .then(function(data){
       if (data.success) {
         textEl.value = '';
-        openThread(mobile);
+        openThread(currentMobile);
       } else {
         alert('Error: ' + (data.error || 'Unknown error'));
-        btn.disabled = false; btn.textContent = 'Send';
       }
+      btn.disabled = false; btn.textContent = 'Send';
     })
     .catch(function(err){
       alert('Connection error: ' + err.message);
       btn.disabled = false; btn.textContent = 'Send';
     });
-}
+});
 
 function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
