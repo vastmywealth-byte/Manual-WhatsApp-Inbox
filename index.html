@@ -24,12 +24,11 @@ body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg,
 .thread-list{ overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch; }
 .thread-item{ padding:16px; border-bottom:1px solid rgba(255,255,255,.06); cursor:pointer; }
 .thread-item:active{ background:rgba(217,169,78,.1); }
- .thread-item.converted{ border-left: 4px solid var(--forest); }
 .role-tag{ font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:10px; display:inline-block; margin-top:4px; }
 .role-customer{ background:rgba(127,176,255,.15); color:#7FB0FF; }
-.role-partner{ background:rgba(217,169,78,.15); color:var(--gold-light); }
+.role-partner{ background:rgba(217,169,78,.15); color:var(--gold); }
 .role-unknown{ background:rgba(255,255,255,.06); color:var(--text-onnavy-muted); }
-  .status-tag{ background:rgba(255,255,255,.06); color:var(--text-onnavy-muted); }
+.status-tag{ background:rgba(255,255,255,.06); color:var(--text-onnavy-muted); }
 .status-new{ background:rgba(127,176,255,.15); color:#7FB0FF; }
 .thread-mobile{ font-weight:700; font-size:15px; }
 .thread-preview{ font-size:13px; color:var(--text-onnavy-muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -40,7 +39,7 @@ body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg,
 .back-btn{ background:none; border:none; color:var(--text-onnavy); font-size:22px; cursor:pointer; padding:4px 8px; line-height:1; }
 .thread-header-info{ flex:1; }
 .thread-header-mobile{ font-weight:700; font-size:15px; }
-  .call-btn{
+.call-btn{
   background: var(--forest);
   color: #fff;
   border-radius: 50%;
@@ -51,7 +50,6 @@ body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg,
   flex-shrink: 0;
 }
 .call-btn:active{ filter:brightness(0.9); }
-.window-badge{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; display:inline-block; margin-top:3px; }
 .window-badge{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; display:inline-block; margin-top:3px; }
 .window-open{ background:rgba(63,190,134,.15); color:var(--forest); }
 .window-closed{ background:rgba(228,119,107,.15); color:var(--rust); }
@@ -132,34 +130,29 @@ function loadThreads(){
 }
 
 function renderThreads(threads){
-      var typeClass = t.type === 'Customer' ? 'role-customer' : (t.type === 'Partner' ? 'role-partner' : 'role-unknown');
+  var list = document.getElementById('threadList');
+  if (!threads.length) { list.innerHTML = '<div class="empty-msg">No recent conversations.</div>'; return; }
+  list.innerHTML = '';
+  threads.forEach(function(t){
+    var item = document.createElement('div');
+    item.className = 'thread-item';
+    var dirLabel = t.lastDirection === 'Out' ? '<span class="thread-dir-out">You: </span>' : '';
+    var typeClass = t.type === 'Customer' ? 'role-customer' : (t.type === 'Partner' ? 'role-partner' : 'role-unknown');
     var statusClass = 'status-tag status-' + String(t.status).toLowerCase().replace(/\s+/g, '-');
-    var displayName = t.name ? escapeHtml(t.name) + ' <span style="opacity:.6;font-weight:400;">(' + escapeHtml(t.mobile) + ')</span>' : escapeHtml(t.mobile);
+    var displayName = t.name
+      ? escapeHtml(t.name) + ' <span style="opacity:.6;font-weight:400;">(' + escapeHtml(t.mobile) + ')</span>'
+      : escapeHtml(t.mobile);
     item.innerHTML = '<div class="thread-mobile">' + displayName + '</div>' +
       '<div class="thread-preview">' + dirLabel + escapeHtml(t.lastMessage) + '</div>' +
       '<div style="margin-top:4px;">' +
         '<span class="role-tag ' + typeClass + '">' + escapeHtml(t.type) + '</span> ' +
         (t.status ? '<span class="role-tag ' + statusClass + '">' + escapeHtml(t.status) + '</span>' : '') +
       '</div>';
-  var list = document.getElementById('threadList');
-  if (!threads.length) { list.innerHTML = '<div class="empty-msg">No recent conversations.</div>'; return; }
-  list.innerHTML = '';
-  threads.forEach(function(t){
-    var item = document.createElement('div');
-    item.className = 'thread-item' + (t.hasLead ? ' converted' : '');
-    var dirLabel = t.lastDirection === 'Out' ? '<span class="thread-dir-out">You: </span>' : '';
-        var typeClass = t.type === 'Customer' ? 'role-customer' : (t.type === 'Partner' ? 'role-partner' : 'role-unknown');
-    var statusClass = 'status-tag status-' + String(t.status).toLowerCase().replace(/\s+/g, '-');
-    item.innerHTML = '<div class="thread-mobile">' + escapeHtml(t.mobile) + '</div>' +
-      '<div class="thread-preview">' + dirLabel + escapeHtml(t.lastMessage) + '</div>' +
-      '<div style="margin-top:4px;">' +
-        '<span class="role-tag ' + typeClass + '">' + escapeHtml(t.type) + '</span> ' +
-        (t.status ? '<span class="role-tag ' + statusClass + '">' + escapeHtml(t.status) + '</span>' : '') +
-      '</div>';
-    item.onclick = function(){ openThread(t.mobile); };
+    item.onclick = function(){ openThread(t.mobile, t.name); };
     list.appendChild(item);
   });
 }
+
 function openThread(mobile, name){
   currentMobile = mobile;
   showThreadView();
