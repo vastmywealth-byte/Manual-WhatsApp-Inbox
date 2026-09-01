@@ -29,6 +29,9 @@ body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg,
 .role-customer{ background:rgba(127,176,255,.15); color:#7FB0FF; }
 .role-partner{ background:rgba(217,169,78,.15); color:var(--gold-light); }
 .role-unknown{ background:rgba(255,255,255,.06); color:var(--text-onnavy-muted); }
+  .lead-filled{ background:rgba(127,176,255,.15); color:#7FB0FF; }
+.docs-submitted{ background:rgba(63,190,134,.15); color:var(--forest); }
+.docs-pending{ background:rgba(217,169,78,.15); color:var(--gold); }
 .thread-mobile{ font-weight:700; font-size:15px; }
 .thread-preview{ font-size:13px; color:var(--text-onnavy-muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .thread-dir-out{ color:var(--forest); }
@@ -138,9 +141,15 @@ function renderThreads(threads){
     item.className = 'thread-item' + (t.hasLead ? ' converted' : '');
     var dirLabel = t.lastDirection === 'Out' ? '<span class="thread-dir-out">You: </span>' : '';
     var roleClass = t.role === 'Customer' ? 'role-customer' : (t.role === 'Partner' ? 'role-partner' : 'role-unknown');
+        var docBadge = t.docStatus === 'Submitted' ? '<span class="role-tag docs-submitted">📄 Docs Uploaded</span>'
+      : (t.docStatus === 'Pending' ? '<span class="role-tag docs-pending">⏳ Docs Pending</span>' : '');
     item.innerHTML = '<div class="thread-mobile">' + escapeHtml(t.mobile) + '</div>' +
       '<div class="thread-preview">' + dirLabel + escapeHtml(t.lastMessage) + '</div>' +
-      '<span class="role-tag ' + roleClass + '">' + escapeHtml(t.role) + (t.hasLead ? ' ✓ Form Filled' : '') + '</span>';
+      '<div style="margin-top:4px;">' +
+        '<span class="role-tag ' + roleClass + '">' + escapeHtml(t.role) + '</span> ' +
+        (t.hasLead ? '<span class="role-tag lead-filled">✓ Details Filled</span> ' : '') +
+        docBadge +
+      '</div>';
     item.onclick = function(){ openThread(t.mobile); };
     list.appendChild(item);
   });
