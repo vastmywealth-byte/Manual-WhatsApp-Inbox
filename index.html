@@ -24,6 +24,11 @@ body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg,
 .thread-list{ overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch; }
 .thread-item{ padding:16px; border-bottom:1px solid rgba(255,255,255,.06); cursor:pointer; }
 .thread-item:active{ background:rgba(217,169,78,.1); }
+ .thread-item.converted{ border-left: 4px solid var(--forest); }
+.role-tag{ font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:10px; display:inline-block; margin-top:4px; }
+.role-customer{ background:rgba(127,176,255,.15); color:#7FB0FF; }
+.role-partner{ background:rgba(217,169,78,.15); color:var(--gold-light); }
+.role-unknown{ background:rgba(255,255,255,.06); color:var(--text-onnavy-muted); }
 .thread-mobile{ font-weight:700; font-size:15px; }
 .thread-preview{ font-size:13px; color:var(--text-onnavy-muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .thread-dir-out{ color:var(--forest); }
@@ -130,15 +135,16 @@ function renderThreads(threads){
   list.innerHTML = '';
   threads.forEach(function(t){
     var item = document.createElement('div');
-    item.className = 'thread-item';
+    item.className = 'thread-item' + (t.hasLead ? ' converted' : '');
     var dirLabel = t.lastDirection === 'Out' ? '<span class="thread-dir-out">You: </span>' : '';
+    var roleClass = t.role === 'Customer' ? 'role-customer' : (t.role === 'Partner' ? 'role-partner' : 'role-unknown');
     item.innerHTML = '<div class="thread-mobile">' + escapeHtml(t.mobile) + '</div>' +
-      '<div class="thread-preview">' + dirLabel + escapeHtml(t.lastMessage) + '</div>';
+      '<div class="thread-preview">' + dirLabel + escapeHtml(t.lastMessage) + '</div>' +
+      '<span class="role-tag ' + roleClass + '">' + escapeHtml(t.role) + (t.hasLead ? ' ✓ Form Filled' : '') + '</span>';
     item.onclick = function(){ openThread(t.mobile); };
     list.appendChild(item);
   });
 }
-
 function openThread(mobile){
   currentMobile = mobile;
   showThreadView();
