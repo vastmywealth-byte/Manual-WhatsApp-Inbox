@@ -132,6 +132,15 @@ function loadThreads(){
 }
 
 function renderThreads(threads){
+      var typeClass = t.type === 'Customer' ? 'role-customer' : (t.type === 'Partner' ? 'role-partner' : 'role-unknown');
+    var statusClass = 'status-tag status-' + String(t.status).toLowerCase().replace(/\s+/g, '-');
+    var displayName = t.name ? escapeHtml(t.name) + ' <span style="opacity:.6;font-weight:400;">(' + escapeHtml(t.mobile) + ')</span>' : escapeHtml(t.mobile);
+    item.innerHTML = '<div class="thread-mobile">' + displayName + '</div>' +
+      '<div class="thread-preview">' + dirLabel + escapeHtml(t.lastMessage) + '</div>' +
+      '<div style="margin-top:4px;">' +
+        '<span class="role-tag ' + typeClass + '">' + escapeHtml(t.type) + '</span> ' +
+        (t.status ? '<span class="role-tag ' + statusClass + '">' + escapeHtml(t.status) + '</span>' : '') +
+      '</div>';
   var list = document.getElementById('threadList');
   if (!threads.length) { list.innerHTML = '<div class="empty-msg">No recent conversations.</div>'; return; }
   list.innerHTML = '';
@@ -151,10 +160,10 @@ function renderThreads(threads){
     list.appendChild(item);
   });
 }
-function openThread(mobile){
+function openThread(mobile, name){
   currentMobile = mobile;
   showThreadView();
-  document.getElementById('threadHeaderMobile').textContent = mobile;
+  document.getElementById('threadHeaderMobile').textContent = name ? (name + ' (' + mobile + ')') : mobile;
   document.getElementById('callBtn').href = 'tel:+91' + mobile;
   document.getElementById('messagesPane').innerHTML = '<div class="empty-msg">Loading…</div>';
   Promise.all([
