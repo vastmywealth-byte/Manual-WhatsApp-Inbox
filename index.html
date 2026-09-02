@@ -135,24 +135,17 @@ function renderThreads(threads){
   list.innerHTML = '';
   threads.forEach(function(t){
     var item = document.createElement('div');
-    item.className = 'thread-item';
+    item.className = 'thread-item' + (t.hasLead ? ' converted' : '');
     var dirLabel = t.lastDirection === 'Out' ? '<span class="thread-dir-out">You: </span>' : '';
-    var typeClass = t.type === 'Customer' ? 'role-customer' : (t.type === 'Partner' ? 'role-partner' : 'role-unknown');
-    var statusClass = 'status-tag status-' + String(t.status).toLowerCase().replace(/\s+/g, '-');
-    var displayName = t.name
-      ? escapeHtml(t.name) + ' <span style="opacity:.6;font-weight:400;">(' + escapeHtml(t.mobile) + ')</span>'
-      : escapeHtml(t.mobile);
+    var roleClass = t.role === 'Customer' ? 'role-customer' : (t.role === 'Partner' ? 'role-partner' : 'role-unknown');
+    var displayName = t.name ? (escapeHtml(t.name) + ' — ' + escapeHtml(t.mobile)) : escapeHtml(t.mobile);
     item.innerHTML = '<div class="thread-mobile">' + displayName + '</div>' +
       '<div class="thread-preview">' + dirLabel + escapeHtml(t.lastMessage) + '</div>' +
-      '<div style="margin-top:4px;">' +
-        '<span class="role-tag ' + typeClass + '">' + escapeHtml(t.type) + '</span> ' +
-        (t.status ? '<span class="role-tag ' + statusClass + '">' + escapeHtml(t.status) + '</span>' : '') +
-      '</div>';
-    item.onclick = function(){ openThread(t.mobile, t.name); };
+      '<span class="role-tag ' + roleClass + '">' + escapeHtml(t.role) + (t.hasLead ? ' ✓ Form Filled' : '') + '</span>';
+    item.onclick = function(){ openThread(t.mobile); };
     list.appendChild(item);
   });
 }
-
 function openThread(mobile, name){
   currentMobile = mobile;
   showThreadView();
