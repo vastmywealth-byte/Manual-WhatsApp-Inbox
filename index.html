@@ -24,12 +24,17 @@ body{ font-family:'IBM Plex Sans',sans-serif; background:linear-gradient(180deg,
 .thread-list{ overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch; }
 .thread-item{ padding:16px; border-bottom:1px solid rgba(255,255,255,.06); cursor:pointer; }
 .thread-item:active{ background:rgba(217,169,78,.1); }
-.role-tag{ font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:10px; display:inline-block; margin-top:4px; }
+
+.tag-row{ display:flex; gap:6px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+.role-tag{ font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:10px; display:inline-block; }
 .role-customer{ background:rgba(127,176,255,.15); color:#7FB0FF; }
 .role-partner{ background:rgba(217,169,78,.15); color:var(--gold); }
 .role-unknown{ background:rgba(255,255,255,.06); color:var(--text-onnavy-muted); }
-.status-tag{ background:rgba(255,255,255,.06); color:var(--text-onnavy-muted); }
-.status-new{ background:rgba(127,176,255,.15); color:#7FB0FF; }
+
+.regstatus-tag{ font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:10px; }
+.regstatus-registered{ background:rgba(63,190,134,.15); color:var(--forest); }
+.regstatus-pending{ background:rgba(228,119,107,.15); color:var(--rust); }
+
 .thread-mobile{ font-weight:700; font-size:15px; }
 .thread-preview{ font-size:13px; color:var(--text-onnavy-muted); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .thread-dir-out{ color:var(--forest); }
@@ -139,10 +144,21 @@ function renderThreads(threads){
     var dirLabel = t.lastDirection === 'Out' ? '<span class="thread-dir-out">You: </span>' : '';
     var roleClass = t.role === 'Customer' ? 'role-customer' : (t.role === 'Partner' ? 'role-partner' : 'role-unknown');
     var displayName = t.name ? (escapeHtml(t.name) + ' — ' + escapeHtml(t.mobile)) : escapeHtml(t.mobile);
+
+    // Registration status tag: "Registered" (from Accounts/Partners) vs
+    // whatever raw status WA Leads has for them (e.g. "New").
+    var regClass = t.status === 'Registered' ? 'regstatus-registered' : 'regstatus-pending';
+    var statusHtml = t.status ? '<span class="regstatus-tag ' + regClass + '">' + escapeHtml(t.status) + '</span>' : '';
+
+    var windowHtml = '<span class="window-badge ' + (t.windowOpen ? 'window-open' : 'window-closed') + '">' + (t.windowOpen ? 'Open' : 'Closed') + '</span>';
+
     item.innerHTML = '<div class="thread-mobile">' + displayName + '</div>' +
       '<div class="thread-preview">' + dirLabel + escapeHtml(t.lastMessage) + '</div>' +
-      '<span class="role-tag ' + roleClass + '">' + escapeHtml(t.role) + (t.hasLead ? ' ✓ Form Filled' : '') + '</span>';
-    item.onclick = function(){ openThread(t.mobile); };
+      '<div class="tag-row">' +
+        '<span class="role-tag ' + roleClass + '">' + escapeHtml(t.role) + (t.hasLead ? ' ✓ Form Filled' : '') + '</span>' +
+        statusHtml + windowHtml +
+      '</div>';
+    item.onclick = function(){ openThread(t.mobile, t.name); };
     list.appendChild(item);
   });
 }
